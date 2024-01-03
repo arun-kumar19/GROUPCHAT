@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script defer src="/public/js/script.js"></script>   
     <title>Sign Up</title>
         <title>Signup Page</title>
         <style>
@@ -45,7 +46,8 @@
         </style>
     </head>
     <body>
-        <form id="signupForm" action="/signup" method="post">
+        <div></div>
+        <div class="form-group border border-black" >
             <label for="name">Name:</label>
             <input type="text" id="name" name="name" required>
     
@@ -58,9 +60,16 @@
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required>
     
-            <button type="submit">Sign Up</button>
-        </form>
+            <button type="submit" id="signupsubmit">Sign Up</button>
+        
+    </div>
+    
+<div></div>
 
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>        
 
 </body>
 </html>
