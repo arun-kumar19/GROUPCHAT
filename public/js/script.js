@@ -14,14 +14,14 @@ const formdata={
 }
         axios.post('/signup',formdata).then(response=>{
             console.log('resonse:',response);
-            alert("User created successfully");
+            alert("Successfully Signed Up");
      document.getElementById("name").value="";
     document.getElementById("email").value="";
     document.getElementById("phone").value="";
     document.getElementById("password").value="";
-conso
         }).catch(error=>{
-            if(error.request.status===406){
+           // console.log('error:',error);
+            if(error.request.status==406){
                 alert(error.response.data);
                 console.log('error during creating user:',error);
             }

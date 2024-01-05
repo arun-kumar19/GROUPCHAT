@@ -7,7 +7,14 @@ const app = express();
 const sequelize=require('./util/database');
 const User=require("./model/signup");
 const PORT = process.env.PORT || 3000;
+var cors=require("cors");
 app.use(bodyParser.json());
+app.use(cors({
+    "origin": "http://127.0.0.1:3000",
+    "methods": ["GET","POST"],
+  }
+));
+    
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -25,7 +32,7 @@ app.get('/signup', (req, res) => {
   });
 
   
-app.post('/signup',  (req, res) => {
+app.post('/signup',(req, res) => {
   const { name, email, phone, password } = req.body;
   console.log(name, ' ',email,' ',password,' ',phone);
 console.log('inside post method');
