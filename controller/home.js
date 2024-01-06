@@ -2,7 +2,8 @@ const bcrypt=require("bcryptjs");
 const saltRounds = 10;
 const path = require('path');
 const User=require("../model/signup");
-
+const jwt=require("jsonwebtoken");
+const secretKey="7539753909887979qggjgjjjjhh"
 exports.getSignIn=(req, res) => {
     res.sendFile(path.join(__dirname, '../views', 'login.html'));
   };
@@ -59,19 +60,25 @@ exports.getSignIn=(req, res) => {
       email:email
     },
     attributes:['id','password','name'],}).then((dbpassword)=>{
+        console.log('dbpassword:',dbpassword);    
+        if(dbpassword.length<1){
+          return res.status(404).json({'status':'failed','message':'User not found'});
+        }
       console.log('user unique id:',dbpassword[0].id,' ','dbpassword:',dbpassword[0].password);
+  
       bcrypt.compare(password,dbpassword[0].password,function(err,result){
         if(result){
           console.log('user entered correct password');
-          res.status(200).json({'id':dbpassword[0].id,'name':dbpassword[0].name,'status':'success'})
+          const token=jwt.sign(dbpassword[0].id,secretKey);
+          res.status(200).json({'token':token,'name':dbpassword[0].name,'status':'success'})
         }
-        if(err){
+        else{
         console.log('err:',err);
-          console.log('user entered wrong password');
+        res.status(401).json({'status':'failed','message':'user is not authorised'})
         }
-        
       })
-
+      
+      
     })
      
   };
