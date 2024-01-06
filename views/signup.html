@@ -4,68 +4,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script defer src="/public/js/script.js"></script>   
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <title>Sign Up</title>
         <title>Signup Page</title>
         <style>
-            body {
-                font-family: Arial, sans-serif;
-                background-color: #f4f4f4;
-                margin: 0;
-                padding: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                height: 100vh;
+            .center-container {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              height: 100vh;
             }
-            form {
-                background-color: #fff;
-                padding: 20px;
-                border-radius: 8px;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-                width: 300px;
-            }
-            label {
-                display: block;
-                margin-bottom: 8px;
-            }
-            input {
-                width: 100%;
-                padding: 8px;
-                margin-bottom: 16px;
-                border: 1px solid #ccc;
-                border-radius: 4px;
-            }
-            button {
-                background-color: #4caf50;
-                color: #fff;
-                padding: 10px;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-            }
-        </style>
-    </head>
-    <body>
-        <div></div>
-        <div class="form-group border border-black" >
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" required>
-    
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-    
-            <label for="phone">Phone Number:</label>
-            <input type="tel" id="phone" name="phone" required>
-    
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-    
-            <button type="submit" id="signupsubmit">Sign Up</button>
+            .inner-div{
+              margin-top: 10px;
+              height: 50%;
         
-    </div>
-    
-<div></div>
+            }
+            </style>        
+    </head>
+    <body class="bg-secondary">
+        <div class="container mt-2">
+            <div class="row">
+                <div class="col-sm">
+          
+                </div>
 
+                <div class="col-sm border border-white">         
+               <!--- <form id="loginform">-->
+                    <h2 class="text-white">Sign In</h2>
+                    <div class="form-group">
+                    <label for="name" class="text-white">Name:</label>
+                  <input type="text" id="name" name="name" class="ml-4" required>
+                </div>         
+                <div class="form-group">
+                  <label for="email" class="text-white">Email:</label>
+                   <input type="email" id="email" name="email" class="ml-4" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone" class="text-white">Phone No:</label>
+                    <input type="tel" id="phone" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="password" class="text-white">Password:</label>
+                    <input type="password" id="password" name="password" class="ml-1" required>
+                    </div>
+                    
+                    <button type="submit" id="signupsubmit" class="btn btn-primary" >Sign Up</button>
+
+                    <div class="row text-white mt-1">
+                        <div class="col-sm">
+                          <p>Already have an account ?
+                          <a href='/' class="btn btn-info" target="_blank" >Login</a></p>
+                        </div>
+                      </div>
+            </div>
+            <div class="col-sm">
+
+            </div>
+</div>
+        </div>
+        
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script defer src="/public/js/signin.js"></script>   
+    <style>
+        .center-container {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+        }
+        .inner-div{
+          margin-top: 10px;
+          height: 50%;
+    
+        }
+        .button {
+    width:100%;
+    display:block;
+}
+      </style>
+</head>
+<body class="bg-secondary">
+   <div class="container mt-2 bg-secondary">
+      <div class="row">
+        <div class="col-sm">
+          
+        </div>
+        <div class="col-sm border border-white">         
+        <h2 class="text-white">Sign In</h2>
+        <div class="form-group">
+            <label for="email" class="text-white">Email:</label>
+            <input type="email" class="form-control" id="email" name="email" autocomplete="email" required>
+        </div>
+        <div class="form-group">
+            <label for="password" class="text-white">Password:</label>
+            <input type="password" class="form-control" id="password" name="password" autocomplete="current-password" required>
+        </div>    
+        <div class="container">
+            <div class="row bg-primary">
+                <div class="col-12">
+                <button type="submit" class="button btn text-white" id="loginSubmit">Sign In</button>
+                </div>
+            </div>
+                <div class="row text-white mt-1">
+                  <div class="col-sm">
+                    <p>Don't have an account ?
+                    <a href='signup' class="btn btn-info" target="_blank" >Sign Up</a></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+<div class="col-sm">
+
+</div>
+</div>
+</div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- Include Bootstrap JS and jQuery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+</body>
+
+</html>
