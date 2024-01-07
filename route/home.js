@@ -9,5 +9,6 @@ router.get('/signup',homeController.getSignUp)
 router.post('/signup',homeController.getSignUpSubmitForm)
 router.get('/index',homeController.getProfile)
 router.post('/savemessage',homeController.saveMessage);
+router.get('/fetchmessage',homeController.getMessages);
 
 module.exports=router;

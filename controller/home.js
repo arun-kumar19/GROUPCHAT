@@ -111,3 +111,35 @@ exports.getSignIn=(req, res) => {
   });  
    
   };
+
+
+
+  exports.getMessages=(req, res) => {
+    const token = req.header("Authorization");
+    const id=jwt.verify(token,secretKey);
+    console.log('token:',token,' ',id);
+  console.log('inside getmessages method');
+
+    Message.findAll({
+      where:{
+      userid:id
+    },
+    attributes:['message'],}).then((message)=>{
+        console.log('message:',message);    
+        if(message.length<1){
+          return res.status(404).json({'status':'failed','message':'no message found'});
+        }
+        else{
+      console.log('message:',message);
+          res.status(200).json({'message':message,'status':'success'})
+        }
+        
+      })
+  };
+      
+
+  exports.getProfile=(req, res) => {
+    res.sendFile(path.join(__dirname, '../views', 'index.html'));
+  };
+
+
