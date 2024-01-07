@@ -104,7 +104,7 @@ exports.getSignIn=(req, res) => {
     message,
   }).then(result=>{
     //      console.log('message saved successfully:',result);
-          res.status(200).send('message saved');     
+          res.status(200).json({'status':'success','result':result});     
   }).catch(error=>{
       console.log('something went wrong:',error);
       res.status(500).send('Error saving data');
@@ -124,14 +124,19 @@ exports.getSignIn=(req, res) => {
       where:{
       userid:id
     },
-    attributes:['message'],}).then((message)=>{
-        console.log('message:',message);    
-        if(message.length<1){
+    order: [
+      ['id', 'DESC'],
+  ],
+    attributes:['id','message'],}).then((messages)=>{
+       // console.log('message:',messages); 
+        const messageJSON=messages.map((expence)=>expence.toJSON());
+        console.log('messageJSON:',messageJSON);
+          
+        if(messages.length<1){
           return res.status(404).json({'status':'failed','message':'no message found'});
         }
         else{
-      console.log('message:',message);
-          res.status(200).json({'message':message,'status':'success'})
+          res.status(200).json({'message':messageJSON,'status':'success'})
         }
         
       })
