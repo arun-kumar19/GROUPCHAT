@@ -2,6 +2,7 @@ const bcrypt=require("bcryptjs");
 const saltRounds = 10;
 const path = require('path');
 const User=require("../model/signup");
+const Message=require("../model/usermessages");
 const jwt=require("jsonwebtoken");
 const secretKey="7539753909887979qggjgjjjjhh"
 exports.getSignIn=(req, res) => {
@@ -86,4 +87,27 @@ exports.getSignIn=(req, res) => {
 
   exports.getProfile=(req, res) => {
     res.sendFile(path.join(__dirname, '../views', 'index.html'));
+  };
+
+
+
+  exports.saveMessage=(req, res) => {
+    const { token, message } = req.body;
+    console.log('token:',token);
+    const id=jwt.verify(token,secretKey);
+    //console.log(token,' ',id,' ',message);
+
+  //console.log('inside save message function');
+
+    Message.create({
+    userid:id,
+    message,
+  }).then(result=>{
+    //      console.log('message saved successfully:',result);
+          res.status(200).send('message saved');     
+  }).catch(error=>{
+      console.log('something went wrong:',error);
+      res.status(500).send('Error saving data');
+  });  
+   
   };
