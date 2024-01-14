@@ -10,5 +10,15 @@ router.post('/signup',homeController.getSignUpSubmitForm)
 router.get('/index',homeController.getProfile)
 router.post('/savemessage',homeController.saveMessage);
 router.get('/fetchmessage',homeController.getMessages);
+router.get('/demo',homeController.getDemo);
+router.get('/loadcontacts',homeController.getContacts)
+router.post('/creategroup',homeController.getCreateGroup)
+router.get('/groupinfo',homeController.getGroupInfo)
+router.get('/loadchat',homeController.getGroupChat);
+router.get('/loadgroupcontacts',homeController.getGroupContacts);
+router.post('/adminaction',homeController.getAdminAction);
+router.post('/updategroupname',homeController.updateGroupName);
+router.get('/loadcontactsexcluded',homeController.getExcludedContacts)
+router.post('/updategroupmemberdetails',homeController.getUpdateGroupMember)
 
 module.exports=router;
