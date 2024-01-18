@@ -74,7 +74,7 @@ async function fetchmessage(){
         button.classList="btn btn-success btn-block"
         button.id=data[i].groupid;
         button.onclick=function() {
-            loadChat(data[i].groupid,data[i].groupname);
+            loadChat(data[i].groupid,data[i].groupname,data[i].memberstatus);
           };
         button.value=data[i].groupname;
         button.title=data[i].groupname;
@@ -82,13 +82,17 @@ async function fetchmessage(){
         div.appendChild(button);
     }
 
-    async function loadChat(groupid,chatgroupname){
+    async function loadChat(groupid,chatgroupname,memberstatus){
         toggleElement.style.display = "block";
     console.log('group id:',groupid,' chatgroupname:',chatgroupname);
     const getChat=await axios.get(`/loadchat?groupid=${groupid}`,{headers:{'Authorization':localStorage.getItem('token')}})
     console.log('response chat:',getChat);
     document.getElementById("chat_header").textContent=chatgroupname;
     loadChatContent(getChat,groupid,chatgroupname);
+    console.log('memberstatus:',memberstatus);
+    if(!memberstatus){
+        document.getElementById("message").disabled="disabled"
+    }
 
     }
 /* 
@@ -258,7 +262,7 @@ async function submitForm() {
     
     const groupName = document.getElementById('groupname').value;
 
-    const checkboxes = document.querySelectorAll('#contacts input[type="checkbox"]:checked');
+    const checkboxes = document.querySelectorAll('#contacts1 input[type="checkbox"]:checked');
 
     // Extract and log the names of the selected checkboxes
     const selectedNames = Array.from(checkboxes).map(checkbox => {
@@ -379,7 +383,7 @@ async function loadGroupContacts(name){
 const groupid=localStorage.getItem("chatgroupid");
     const response=await axios.get(`/loadgroupcontacts?groupid=${groupid}`,{headers:{'Authorization':localStorage.getItem("token")}});
 
-    console.log('contacts:',response.data.isadmin);
+    console.log('contacts:',response.data);
     const adminstatus=response.data.isadmin;
     console.log('adminstatus:',adminstatus);
     console.log('currentuserid:',response.data.userid);
@@ -400,17 +404,18 @@ const groupid=localStorage.getItem("chatgroupid");
 console.log('data:',contacts[i].adminid,' ', response.data.userid,' ',contacts[i].memberid,contacts[i].adminid===contacts[i].memberid && contacts[i].memberid===currentuserid)
 console.log(typeof contacts[i].adminid,' ', typeof contacts[i].memberid,' ',typeof  currentuserid)
 
-        if(contacts[i].adminid==contacts[i].memberid && contacts[i].memberid==currentuserid){
+        if(contacts[i].adminid==contacts[i].memberid && contacts[i].memberid==currentuserid ){
             console.log('admin yes');
-        contact=`You <b> admin</b>`// <button type="submit" id=${contacts[i].memberid} onclick="checkAdmin('${localStorage.getItem('chatgroupid')}', '${contacts[i].memberid}', 1)", class="btn btn-primary btn-sm"> dismiss as admin</button>`;
+        contact=`You <b> admin </b><button type="submit" id=${contacts[i].memberid} onclick="checkAdmin('${localStorage.getItem('chatgroupid')}', '${contacts[i].memberid}', 1)", class="btn btn-primary btn-sm"> dismiss as admin</button>`;
     
         }
 
         if(contacts[i].adminid===contacts[i].memberid && contacts[i].memberid!=currentuserid && adminstatus){
             console.log('admin no');
-        contact=`${contacts[i].usersignup.name}<b> admin</b> <button type="submit" id=${contacts[i].memberid} onclick="checkAdmin('${localStorage.getItem('chatgroupid')}', '${contacts[i].memberid}', 1)", class="btn btn-primary btn-sm"> dismiss as admin</button>`;
+        contact=`${contacts[i].usersignup.name}<b> admin</b> <button type="submit" id=${contacts[i].memberid} onclick="checkAdmin('${localStorage.getItem('chatgroupid')}', '${contacts[i].memberid}', 1)", class="btn btn-primary btn-sm"> dismiss as admin</button>
+         <button type="submit" id=${contacts[i].memberid} onclick="removeuser('${localStorage.getItem('chatgroupid')}', '${contacts[i].memberid}')", class="btn btn-secondary btn-sm"> remove</button>`;
         }
-        if(contacts[i].adminid!==contacts[i].memberid && contacts[i].memberid==currentuserid){
+        if(contacts[i].adminid!==contacts[i].memberid && contacts[i].memberid==currentuserid && !adminstatus){
             contact='You'
         }
 
@@ -419,7 +424,8 @@ console.log(typeof contacts[i].adminid,' ', typeof contacts[i].memberid,' ',type
         }
 
         if(contacts[i].adminid!==contacts[i].memberid && contacts[i].memberid!=currentuserid && adminstatus){
-            contact=`${contacts[i].usersignup.name} <button type="submit" id=${contacts[i].memberid}, onclick="checkAdmin('${localStorage.getItem('chatgroupid')}', '${contacts[i].memberid}', 0)", class="btn btn-primary btn-sm"> make admin</button>`;
+            contact=`${contacts[i].usersignup.name} <button type="submit" id=${contacts[i].memberid}, onclick="checkAdmin('${localStorage.getItem('chatgroupid')}', '${contacts[i].memberid}', 0)", class="btn btn-primary btn-sm"> make admin</button>
+            <button type="submit" id=${contacts[i].memberid} onclick="removeuser('${localStorage.getItem('chatgroupid')}', '${contacts[i].memberid}')", class="btn btn-secondary btn-sm"> remove</button>`;
         }
 
         if(contacts[i].adminid==contacts[i].memberid && contacts[i].memberid!=currentuserid && !adminstatus){
@@ -461,9 +467,11 @@ async function checkAdmin(chatgroupid,userid,isadmin){
     const response=await axios.post('/adminaction',info);
     console.log('response:',response.data.message);
     if(response.data.status==1){
+        $('#myModalgroupinfo').modal('hide');
         alert("admin created successfully");
     }
     if(response.data.status==2){
+        $('#myModalgroupinfo').modal('hide');
         alert("admin removed successfully");
     }
     }
@@ -554,10 +562,30 @@ document.getElementById('updateGroupSubmitBtn').addEventListener('click',async f
     
         if(response.data.STATUS===1){
             $('#myModal').modal('hide');
+            $('#myModalgroupinfo').modal('hide');
             alert('member added Successdully')
         }
         else{
+            $('#myModalgroupinfo').modal('hide');
             alert('Something went wrong!!!')
         }
 
 })
+
+
+async function removeuser(groupid,userid){
+    console.log(groupid,' ',userid);
+    const info={
+        groupid:groupid,
+        memberid:userid,
+        actionbyid:localStorage.getItem("token")
+    }
+console.log('info:',info);
+    const response=await axios.post('/removeuser',info);
+    console.log('respose:',response);
+
+    if(response.status=200){
+        alert("user removed successfully");
+        $('#myModalgroupinfo').modal('hide');
+    }
+}

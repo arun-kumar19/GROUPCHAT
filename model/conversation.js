@@ -12,6 +12,10 @@ const sequelize=require("../util/database");
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    isactive: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
     groupid: {
       type: DataTypes.INTEGER,
       allowNull: false,

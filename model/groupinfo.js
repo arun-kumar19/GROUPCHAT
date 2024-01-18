@@ -29,6 +29,11 @@ const usersignups=require("./signup");
         model: usersignups,
         key: 'id'
       }
+    },
+    memberstatus: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true 
     }
   });
   module.exports=groupinfo;

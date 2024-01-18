@@ -255,7 +255,8 @@ console.log('inside save message function');
           'groupid',
           [Sequelize.col('groupcreator.groupname'), 'groupname'],
           'adminid',
-          'memberid'
+          'memberid',
+          'memberstatus'
         ],
         include: [{
           model: groupCreator,
@@ -308,6 +309,9 @@ console.log('inside save message function');
     const id=jwt.verify(token,secretKey);
     const groupid=req.query.groupid;
     console.log('inside getGroupContacts method and user id is ',id);
+    const groupcreator=await groupCreator.findByPk(groupid);
+    const stringifyObj=JSON.stringify(groupcreator);
+    console.log('groupcreator:',groupcreator.id);
 
     groupInfo.findAll({
       attributes: ['groupid', 'adminid', 'memberid'],
@@ -318,7 +322,8 @@ console.log('inside save message function');
           where: { id: Sequelize.col('groupInfo.memberid') }
         }
       ],
-      where: { groupid: groupid },
+      where: { groupid: groupid,
+      memberstatus:true },
       order: [['adminid', 'DESC']]
     })
 .then(results => {
@@ -448,18 +453,27 @@ exports.getExcludedContacts=(req, res) => {
   const chatgroupid=req.query.groupid;
   const id=jwt.verify(token,secretKey);
   console.log('inside getExcludedContacts method: id and groupid',id, ' ',chatgroupid);
+  
   User.findAll({
+    attributes: ['id', 'phone','name',[Sequelize.col('groupinfos.groupid'), 'groupid'], [Sequelize.col('groupinfos.memberid'), 'memberid'], [Sequelize.col('groupinfos.memberstatus'), 'memberstatus']],
     where: {
-      '$groupinfos.memberid$': null
+      [Sequelize.Op.or]: [
+        { '$groupinfos.memberstatus$': 0 },
+        { '$groupinfos.memberid$': null },
+      ],
     },
-     include: [{model: groupinfo, as: 'groupinfos',
-     where:{ 
-      groupid: chatgroupid
-    },
-    required: false
-    }]
+     include: [{
+      model: groupinfo,
+      where:{ 
+        groupid: chatgroupid
+      },
+     required:false,
+     as:'groupinfos',
+    }],
+  
   }).then((contacts)=>{
-      //f console.log('exclueded contacts:',JSON.stringify(contacts, null, 2)); 
+    //console.log('result:',contacts);
+      console.log('exclueded contacts:',JSON.stringify(contacts, null, 2)); 
         const contactsJSON=contacts.map((contact)=>contact.toJSON());
         //console.log('messageJSON:',contactsJSON);
           
@@ -483,38 +497,82 @@ exports.getExcludedContacts=(req, res) => {
     const id=jwt.verify(token,secretKey);
     console.log('id:',id,'groupid:',groupid,' member:',member);
     const t = await sequelize.transaction();
+
+    const info=await groupinfo.findAll({
+      where :{
+        groupid:groupid
+      }
+     })
+
+     const infoArray = info.map((instance) => instance.toJSON());
+      console.log(infoArray);
+
+     console.log('info:',JSON.stringify(info));
+     
       try{
 
-        groupCreator.update(
+        const groupNameUpdate=await groupCreator.update(
           {groupname:groupname},
           {where :{
             id:groupid
-          }},{transaction:t}).then(async (result)=>{
-            console.log('group updated:',JSON.stringify(result));
+          }},{transaction:t})
            
-      const memberPromises = member.map(async (memberId) => {
-        try {
+      const memberPromises = member.map(async(memberId) => {
+        
          console.log('groupid:',groupid,' id:',id, '    memberId:',memberId);
-         const result =await groupInfo.create({ groupid,memberid:memberId }, { transaction: t });
-          console.log('member added successfully:', result);
-        } catch (error) {
-          console.log('something went wrong while adding member in group', error);
-          throw error; // Re-throw the error to catch it in the outer catch block
-        }
-      });
+         
+         const specificInfo = infoArray.find(item=> item.memberid === memberId);
+         let result;
+    if (specificInfo) {
+          console.log('Found:', specificInfo);
+          result=await groupinfo.update(
+            {memberstatus:1},
+            {where :{
+              groupid:groupid,
+              memberid:memberId
+            }},{transaction:t})
+  } else {
+    console.log('Not found');
+    result=await groupInfo.create({ groupid,memberid:memberId }, { transaction: t });
+    console.log('member added successfully123:', result);
+  }
+          
+})
   
-          await Promise.all([...memberPromises]);
+      await Promise.all([groupNameUpdate,...memberPromises]);
          await t.commit();
          console.log('member and group updated successfully');
          res.status(200).json({ 'STATUS': 1,'MESSAGE':'GROUP_CREATED' });
-        }).catch(error=>{
-          console.log('something went wrong while adding member in group', error);
-          throw error; // Re-throw the error to catch it in the outer catch block
-        })
-      }catch(error){
+        }
+      catch(error){
           await t.rollback();
         console.log('Transaction rolled back due to an error:', error);
         res.status(401).json({ 'STATUS': 0,'MESSAGE':'SOMETHING WENT WRONG' });
         }
     }
         
+
+
+    exports.getRemoveUser=async(req, res) => {
+
+      console.log('inside getRemoveUser method');
+      const {groupid,memberid,actionbyid}=req.body;
+      const id=jwt.verify(actionbyid,secretKey);
+      console.log('memberid:',memberid,'groupid:',groupid,' actionbyid:',actionbyid);
+
+          groupinfo.update(
+            {memberstatus:false},
+            {where :{
+              groupid:groupid,
+              memberid:memberid
+            }}).then(async (result)=>{
+              console.log('result:',result, ' result type:',typeof result);
+              console.log('group updated:',JSON.stringify(result));    
+           console.log('member removed successfully');
+           res.status(200).json({ 'STATUS': 1,'MESSAGE':'member removed' });
+          }).catch(async(error)=>{
+            res.status(401).json({ 'STATUS': 0,'MESSAGE':'SOMETHING WENT WRONG' });
+            console.log('something went wrong while removing member in group', error);
+            throw error; // Re-throw the error to catch it in the outer catch block
+          })
+  }
