@@ -6,6 +6,7 @@ document.getElementById("name").innerText=getNameFromLocalStorage.replace(/\b[a-
 */
 let localStorageMessages;
 const token=localStorage.getItem("token");
+console.log('taken:',token);
 document.getElementById("sendMessage").addEventListener("click",saveMessage);
 
 async function saveMessage(){

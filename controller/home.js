@@ -245,6 +245,7 @@ console.log('inside save message function');
    
   exports.getGroupInfo=async (req, res) => {
     const token=req.header('Authorization');
+    console.log('inside getGroupInfo method');
     console.log('token:',token);
     const id=jwt.verify(token,secretKey);
     console.log('inside getGroupInfo method');
