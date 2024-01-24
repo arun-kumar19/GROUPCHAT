@@ -21,5 +21,6 @@ router.post('/updategroupname',homeController.updateGroupName);
 router.get('/loadcontactsexcluded',homeController.getExcludedContacts)
 router.post('/updategroupmemberdetails',homeController.getUpdateGroupMember)
 router.post('/removeuser',homeController.getRemoveUser)
+router.get('/getstatus',homeController.getStatus);
 
 module.exports=router;

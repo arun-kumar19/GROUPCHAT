@@ -22,6 +22,16 @@
             height: 5%;
             background-color: #f0f0f0;
         }
+
+
+    /* Custom style for the scrollable div */
+    .scrollable-div {
+      max-height: 100%; /* Set a maximum height for the scrollable div */
+      overflow-y: auto; /* Enable vertical scrolling */
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+  
     </style>
 </head>
 <body>
@@ -123,7 +133,7 @@
                         
                     </div>
                 </div>
-                <div class="col-8 border border-black">
+                <div class="col-8 border border-black scrollable-div">
                     <table id="tabledata" class="table table-striped">
 
 
@@ -161,5 +171,106 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>        
+    <script src="/socket.io/socket.io.js"></script>
+
+<script>
+    var socket = io();
+  
+    var input = document.getElementById('message');
+  
+document.getElementById('sendMessage').addEventListener('click', function(e) {
+      e.preventDefault();
+      if (input.value) {
+        const data={
+            messengersendortoken:localStorage.getItem("token"),
+            messengersendorname:localStorage.getItem("name"),
+            message:input.value
+        }
+        socket.emit('chat message', data);
+      }
+    });
+  
+
+socket.on('chat message', async function(msg) {
+    console.log('message from server:',msg);
+    var item = document.createElement('li');
+    item.textContent = msg.message;
+<!--    messages.appendChild(item);
+  //  window.scrollTo(0, document.body.scrollHeight);
+  -->
+
+  console.log('sender id:',msg.messengersendortoken);
+
+  const tbody=document.getElementById("tbody");
+  const tr=document.createElement("tr");
+  const td=document.createElement("td");
+  td.classList='text-right'
+  try{
+  const response=await axios.get('/getstatus',{
+    headers: {
+    'messengersendortoken': msg.messengersendortoken,
+    'currentusertoken': localStorage.getItem("token")
+  }
+  })
+console.log('response data:',response);
+
+if(response.data.STATUS===1){
+    td.classList='text-right'
+  td.textContent = 'You: ' + msg.message;
+} 
+ 
+if(response.data.STATUS===0){
+    td.classList='text-left'
+td.textContent = msg.messengersendorname +': '+ msg.message;
+}
+  }
+  catch(error){
+    console.log('error during getting status:',error);
+  }
+// Get the current date
+
+  const currentDate = new Date();
+
+// Add one day
+const nextDate = new Date(currentDate);
+nextDate.setDate(currentDate.getDate() + 1);
+
+// Format the next date as a string (YYYY-MM-DD)
+  const today = nextDate.toISOString().slice(0, 10);
+ 
+  function addLeadingZero(number) {
+  return number < 10 ? "0" + number : number;
+}
+// Get the current time in "HH:mm:ss" format
+const timeNow = addLeadingZero(new Date().getHours()) + ":" +
+                addLeadingZero(new Date().getMinutes()) + ":" +
+                addLeadingZero(new Date().getSeconds());
+
+// Concatenate the date and time
+const dbTimeString = today + " " + timeNow;
+
+    const dbTime = new Date(dbTimeString);
+    const options = { 
+        hour: '2-digit', 
+        minute: '2-digit'
+        
+};
+
+const options2 = { 
+    day: '2-digit', 
+    month: 'short',
+    year:'2-digit',
+    
+};
+
+const formattedTime =dbTime.toLocaleString('en-US', options)+' '+dbTime.toLocaleString('en-US', options2);
+
+td.innerHTML += "<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
+            tr.appendChild(td);
+            tbody.appendChild(tr);
+console.log('tr:',tr);
+console.log('td:',td);
+  });
+</script>
 </body>
 </html>

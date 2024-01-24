@@ -25,7 +25,7 @@ const token=localStorage.getItem("token");
             chatgroupid:chatgroupid
         }
         const response=await axios.post('/savemessage',messageJson);
-        console.log('response:',response);
+        console.log('response on save message:',response);
         if(response.status===200){
             alert('message sent successfully');
             /* const jsonData={
@@ -319,7 +319,7 @@ function loadChatContent(response,groupid,groupname){
         tr.appendChild(td);
         tbody.appendChild(tr);
 
-        for(let i=start;i<datalength;i++){
+        for(let i=datalength-1;i>=start;i--){
                 console.log('data:',data[i].message)
             const tr=document.createElement("tr");
             const td=document.createElement("td");
@@ -590,3 +590,4 @@ console.log('info:',info);
         $('#myModalgroupinfo').modal('hide');
     }
 }
+

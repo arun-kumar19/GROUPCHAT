@@ -15,10 +15,14 @@ const groupinfo=require("../model/groupinfo");//do not remove it
 const { error } = require('console');
 const usermessage = require('../model/usermessages');
 const { createDiffieHellmanGroup } = require('crypto');
+
 exports.getSignIn=(req, res) => {
     res.sendFile(path.join(__dirname, '../views', 'login.html'));
   };
   
+ 
+
+
   exports.getSignUp=(req, res) => {
       res.sendFile(path.join(__dirname, '../views', 'signup.html'));
     };
@@ -75,7 +79,7 @@ exports.getSignIn=(req, res) => {
       email:email
     },
     attributes:['id','password','name'],}).then((dbpassword)=>{
-        console.log('dbpassword:',dbpassword);    
+        //console.log('dbpassword:',dbpassword);    
         if(dbpassword.length<1){
           return res.status(404).json({'status':'failed','message':'User not found'});
         }
@@ -145,7 +149,7 @@ console.log('inside save message function');
     const token = req.header("Authorization");
     const id=jwt.verify(token,secretKey);
     console.log('token:',token,' ',id);
-  console.log('inside getmessages method');
+  //console.log('inside getmessages method');
 
     Message.findAll({
       where:{
@@ -178,7 +182,7 @@ console.log('inside save message function');
   exports.getContacts=(req, res) => {
   const token=req.header('Authorization');
   const id=jwt.verify(token,secretKey);
-  console.log('inside getContacts method');
+  //console.log('inside getContacts method');
 
   User.findAll({
       where:{
@@ -190,7 +194,7 @@ console.log('inside save message function');
     attributes:['id','name','phone'],}).then((contacts)=>{
        // console.log('contacts:',contacts); 
         const contactsJSON=contacts.map((contact)=>contact.toJSON());
-        console.log('messageJSON:',contactsJSON);
+        //console.log('messageJSON:',contactsJSON);
           
         if(contacts.length<1){
           return res.status(404).json({'status':'failed','message':'no message found'});
@@ -206,7 +210,7 @@ console.log('inside save message function');
 
   exports.getCreateGroup=async(req, res) => {
 
-  console.log('inside getCreateGroup method');
+  //console.log('inside getCreateGroup method');
   const {groupname,member}=req.body;
   const token=req.header("Authorization");
   const id=jwt.verify(token,secretKey);
@@ -214,17 +218,17 @@ console.log('inside save message function');
   const t = await sequelize.transaction();
     try{
     const group = await groupCreator.create({ groupcreatorid: id,groupname, usersignupId: id }, { transaction: t });
-    console.log('group:', group.id);
+    //console.log('group:', group.id);
     const groupid=group.id;
          
     const admin = await groupInfo.create({ groupid, adminid: id, memberid: id, groupcreatorid: id }, { transaction: t });
-    console.log('admin created:',admin);
+    //console.log('admin created:',admin);
 
     const memberPromises = member.map(async (memberId) => {
       try {
        console.log('groupid:',groupid,' id:',id, '    memberId:',memberId);
        const result =await groupInfo.create({ groupid,memberid:memberId }, { transaction: t });
-        console.log('member added successfully:', result);
+       // console.log('member added successfully:', result);
       } catch (error) {
         console.log('something went wrong while adding member in group', error);
         throw error; // Re-throw the error to catch it in the outer catch block
@@ -245,10 +249,10 @@ console.log('inside save message function');
    
   exports.getGroupInfo=async (req, res) => {
     const token=req.header('Authorization');
-    console.log('inside getGroupInfo method');
+    //console.log('inside getGroupInfo method');
     console.log('token:',token);
     const id=jwt.verify(token,secretKey);
-    console.log('inside getGroupInfo method');
+    //console.log('inside getGroupInfo method');
 
     try {
       const groupInfos = await groupInfo.findAll({
@@ -266,7 +270,7 @@ console.log('inside save message function');
         }],
         where: { memberid: id }
       });
-  console.log('groupinfos:',JSON.stringify(groupInfos));
+  //console.log('groupinfos:',JSON.stringify(groupInfos));
       res.status(200).json({ status: 'success', 'groupInfos':groupInfos });
     } catch (error) {
       console.error('Error retrieving group information:', error);
@@ -279,7 +283,7 @@ console.log('inside save message function');
     const token=req.header('Authorization');
     const id=jwt.verify(token,secretKey);
     const groupid=req.query.groupid;
-    console.log('inside getGroupChat method');
+    //console.log('inside getGroupChat method');
 
     try {
     const chat=await conversation.findAll({
@@ -295,6 +299,10 @@ console.log('inside save message function');
         required: true
         }],
         where: { groupid: groupid },
+        order: [
+          ['createdAt', 'DESC']
+        ],
+        limit: 6,
       })
   console.log('chat:',JSON.stringify(chat));
       res.status(200).json({ status: 'success', 'message':chat,'cid':id });//cid==currentuserid who logged in
@@ -309,6 +317,7 @@ console.log('inside save message function');
     const token=req.header('Authorization');
     const id=jwt.verify(token,secretKey);
     const groupid=req.query.groupid;
+    console.log('group id:',groupid);
     console.log('inside getGroupContacts method and user id is ',id);
     const groupcreator=await groupCreator.findByPk(groupid);
     const stringifyObj=JSON.stringify(groupcreator);
@@ -320,7 +329,8 @@ console.log('inside save message function');
         {
           model: User,
           attributes: ['name'],
-          where: { id: Sequelize.col('groupInfo.memberid') }
+          required: true
+ //        where: { id: Sequelize.col('groupInfo.memberid') }
         }
       ],
       where: { groupid: groupid,
@@ -329,12 +339,12 @@ console.log('inside save message function');
     })
 .then(results => {
   const groupJSON=results.map((results)=>results.toJSON());
-        console.log('groupJSON:',groupJSON);
+        //console.log('groupJSON:',groupJSON);
  
         const groupWithAdminId = findGroupByAdminId(groupJSON, id);
 
         if (groupWithAdminId) {
-          console.log('is admin:',groupWithAdminId);
+          //console.log('is admin:',groupWithAdminId);
         } else {
           console.log('is admin:',groupWithAdminId);
         }
@@ -351,7 +361,7 @@ console.log('inside save message function');
 
 function findGroupByAdminId(groups, targetAdminId) {
   for (const group of groups) {
-    console.log('group:',group);
+    //console.log('group:',group);
     if (group.adminid == targetAdminId) {
       console.log('user is admin');
       return true;
@@ -493,7 +503,7 @@ exports.getExcludedContacts=(req, res) => {
 
   exports.getUpdateGroupMember=async(req, res) => {
 
-    console.log('inside getUpdateGroupMember method');
+    //console.log('inside getUpdateGroupMember method');
     const {groupname,groupid,token,member}=req.body;
     const id=jwt.verify(token,secretKey);
     console.log('id:',id,'groupid:',groupid,' member:',member);
@@ -567,9 +577,10 @@ exports.getExcludedContacts=(req, res) => {
               groupid:groupid,
               memberid:memberid
             }}).then(async (result)=>{
-              console.log('result:',result, ' result type:',typeof result);
+              //console.log('result:',result, ' result type:',typeof result);
               console.log('group updated:',JSON.stringify(result));    
            console.log('member removed successfully');
+           
            res.status(200).json({ 'STATUS': 1,'MESSAGE':'member removed' });
           }).catch(async(error)=>{
             res.status(401).json({ 'STATUS': 0,'MESSAGE':'SOMETHING WENT WRONG' });
@@ -577,3 +588,25 @@ exports.getExcludedContacts=(req, res) => {
             throw error; // Re-throw the error to catch it in the outer catch block
           })
   }
+
+
+
+  exports.getStatus=(req, res) => {
+
+    console.log('inside getStatus method');
+    const messengersendortoken=req.header("messengersendortoken");
+    const currentusertoken=req.header("currentusertoken");
+    console.log('messengersendortoken',messengersendortoken,' currentusertoken',currentusertoken);
+    const messengersendorid=jwt.verify(messengersendortoken,secretKey);
+    const currentuserid=jwt.verify(currentusertoken,secretKey);
+    console.log('messengersendorid:',messengersendorid,'currentuserid:',currentuserid);
+
+    if(messengersendorid===currentuserid){
+       
+         res.status(200).json({ 'STATUS': 1,'MESSAGE':'you are sendor' });
+        }
+    else{
+          res.status(200).json({ 'STATUS': 0,'MESSAGE':'other group member is sendor' });
+    
+        }
+}
