@@ -20,7 +20,15 @@ const sequelize=require("../util/database");
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    MessageType:{
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     message: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    ContentURL:{
       type: DataTypes.STRING,
       allowNull: false,
     },

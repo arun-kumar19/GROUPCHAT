@@ -12,16 +12,11 @@ const secretKey="7539753909887979qggjgjjjjhh"
 const groupCreator=require("../model/groupcreators");
 const groupInfo=require("../model/groupinfo");
 const groupinfo=require("../model/groupinfo");//do not remove it
-const { error } = require('console');
-const usermessage = require('../model/usermessages');
-const { createDiffieHellmanGroup } = require('crypto');
 
 exports.getSignIn=(req, res) => {
     res.sendFile(path.join(__dirname, '../views', 'login.html'));
   };
   
- 
-
 
   exports.getSignUp=(req, res) => {
       res.sendFile(path.join(__dirname, '../views', 'signup.html'));
@@ -290,8 +285,10 @@ console.log('inside save message function');
       attributes: [
         'groupid',
         'memberid',
+        'MessageType',
         [Sequelize.col('usersignup.name'), 'name'],
         'message',
+        'ContentURL',
         'createdAt'
       ],
          include: [{model: User, as: 'usersignup',

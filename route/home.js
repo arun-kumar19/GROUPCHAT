@@ -8,7 +8,7 @@ router.post('/logincheck',homeController.getSignInCheck)
 router.get('/signup',homeController.getSignUp)
 router.post('/signup',homeController.getSignUpSubmitForm)
 router.get('/index',homeController.getProfile)
-router.post('/savemessage',homeController.saveMessage);
+//router.post('/savemessage',homeController.saveMessageTwo);
 router.get('/fetchmessage',homeController.getMessages);
 router.get('/demo',homeController.getDemo);
 router.get('/loadcontacts',homeController.getContacts)
@@ -22,5 +22,6 @@ router.get('/loadcontactsexcluded',homeController.getExcludedContacts)
 router.post('/updategroupmemberdetails',homeController.getUpdateGroupMember)
 router.post('/removeuser',homeController.getRemoveUser)
 router.get('/getstatus',homeController.getStatus);
+
 
 module.exports=router;

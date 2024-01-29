@@ -31,6 +31,25 @@
       border: 1px solid #ccc;
       padding: 10px;
     }
+
+    .custom-file-upload {
+            display: inline-block;
+            cursor: pointer;
+            padding: 6px 20px 6px 19px;
+            border: 1px solid #ccc;
+            border-radius: 2px;
+            background-color: #fff;
+        }
+
+        .attachment-icon {
+            margin-right: 4px;
+        }
+
+        #fileInput{
+            display: none;
+        }
+
+        html, body {margin: 0; height: 100%; overflow: hidden}
   
     </style>
 </head>
@@ -151,11 +170,19 @@
             </div>
             <div class="col-6">
                     <div class="row no-gutters">
-                        <div class="col-9">
+                        <div class="col-8">
                                 <input type="text" id="message" class="form-control" placeholder="Text Input">
+                                
                             </div>
-                        <div class="col-3">
-                            <button type="button" class="btn btn-primary" id="sendMessage">Send</button>
+                            <div class="col-1">
+                                <label for="fileInput" class="custom-file-upload">
+                                    <span class="attachment-icon">&#128206;</span>
+                                    </label>
+                            <input type="file" id="fileInput" class="form-control mr-0">
+                        </div
+                            
+                        <div class="col-4">
+                            <button type="button" class="btn btn-primary ml-0" id="sendMessage">Send</button>
                         </div>
                 </div>
             </div>
@@ -171,106 +198,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>        
-    <script src="/socket.io/socket.io.js"></script>
+    <!-- Include Socket.io from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 
-<script>
-    var socket = io();
-  
-    var input = document.getElementById('message');
-  
-document.getElementById('sendMessage').addEventListener('click', function(e) {
-      e.preventDefault();
-      if (input.value) {
-        const data={
-            messengersendortoken:localStorage.getItem("token"),
-            messengersendorname:localStorage.getItem("name"),
-            message:input.value
-        }
-        socket.emit('chat message', data);
-      }
-    });
-  
+    <script src="/public/js/profile.js"></script>
 
-socket.on('chat message', async function(msg) {
-    console.log('message from server:',msg);
-    var item = document.createElement('li');
-    item.textContent = msg.message;
-<!--    messages.appendChild(item);
-  //  window.scrollTo(0, document.body.scrollHeight);
-  -->
-
-  console.log('sender id:',msg.messengersendortoken);
-
-  const tbody=document.getElementById("tbody");
-  const tr=document.createElement("tr");
-  const td=document.createElement("td");
-  td.classList='text-right'
-  try{
-  const response=await axios.get('/getstatus',{
-    headers: {
-    'messengersendortoken': msg.messengersendortoken,
-    'currentusertoken': localStorage.getItem("token")
-  }
-  })
-console.log('response data:',response);
-
-if(response.data.STATUS===1){
-    td.classList='text-right'
-  td.textContent = 'You: ' + msg.message;
-} 
- 
-if(response.data.STATUS===0){
-    td.classList='text-left'
-td.textContent = msg.messengersendorname +': '+ msg.message;
-}
-  }
-  catch(error){
-    console.log('error during getting status:',error);
-  }
-// Get the current date
-
-  const currentDate = new Date();
-
-// Add one day
-const nextDate = new Date(currentDate);
-nextDate.setDate(currentDate.getDate() + 1);
-
-// Format the next date as a string (YYYY-MM-DD)
-  const today = nextDate.toISOString().slice(0, 10);
- 
-  function addLeadingZero(number) {
-  return number < 10 ? "0" + number : number;
-}
-// Get the current time in "HH:mm:ss" format
-const timeNow = addLeadingZero(new Date().getHours()) + ":" +
-                addLeadingZero(new Date().getMinutes()) + ":" +
-                addLeadingZero(new Date().getSeconds());
-
-// Concatenate the date and time
-const dbTimeString = today + " " + timeNow;
-
-    const dbTime = new Date(dbTimeString);
-    const options = { 
-        hour: '2-digit', 
-        minute: '2-digit'
-        
-};
-
-const options2 = { 
-    day: '2-digit', 
-    month: 'short',
-    year:'2-digit',
-    
-};
-
-const formattedTime =dbTime.toLocaleString('en-US', options)+' '+dbTime.toLocaleString('en-US', options2);
-
-td.innerHTML += "<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
-            tr.appendChild(td);
-            tbody.appendChild(tr);
-console.log('tr:',tr);
-console.log('td:',td);
-  });
-</script>
 </body>
 </html>

@@ -1,10 +1,4 @@
-//const { json } = require("body-parser");
-
-/*const getNameFromLocalStorage=localStorage.getItem("name");
-console.log('name:',getNameFromLocalStorage);
-document.getElementById("name").innerText=getNameFromLocalStorage.replace(/\b[a-z]/g, (x) => x.toUpperCase())
-*/
-let localStorageMessages;
+const socket = io();
 const token=localStorage.getItem("token");
 console.log('taken:',token);
 document.getElementById("sendMessage").addEventListener("click",saveMessage);
@@ -13,43 +7,48 @@ async function saveMessage(){
     const chatgroupid=localStorage.getItem("chatgroupid");
 
     const message=document.getElementById("message").value;
-console.log('message:',message);
+    const fileInput=document.getElementById("fileInput");
+    const file = fileInput.files[0];
 
-const token=localStorage.getItem("token");
+console.log('message:',typeof message,' len is:',message.length, 'fileinput :',file,'  condition:',(message.length>0 || typeof file!='undefined'));
 
-    if(message.length>0){
-
-        const messageJson={
-            token:token,
-            message:message,
-            chatgroupid:chatgroupid
-        }
-        const response=await axios.post('/savemessage',messageJson);
+    if(message.length>0 || typeof file!='undefined'){
+console.log('hello world');
+        const formData =new FormData();
+        formData.append("token",token)
+          formData.append("message",(message.length<=0)?'null':message);
+            formData.append("chatgroupid",chatgroupid);
+            formData.append("file",(file==='undefined')?'null':file);
+            try{
+        const response=await axios.post('/savemessage',formData,{headers:{Authorization:localStorage.getItem("token"),
+        'Content-Type': 'multipart/form-data'},});
         console.log('response on save message:',response);
+        
+        
         if(response.status===200){
-            alert('message sent successfully');
-            /* const jsonData={
-                id:response.data.result.id,
-                message:response.data.result.message
+        
+            const data={
+                ContentURL:response.data.result.ContentURL,
+                MessageType:response.data.result.MessageType,
+                message:response.data.result.message,
+                chatgroupid:response.data.result.groupid
             }
-console.log('jsonData:',jsonData);
-            if(localStorageMessages.length===10){
-                console.log('abcd');
-                localStorageMessages.shift();
-                console.log('localStorageMessages updated:',localStorageMessages);
-
-                localStorageMessages.push(jsonData)
-                console.log('localStorageMessages updated after push:',localStorageMessages);
-                localStorage.setItem("last10messages",JSON.stringify(localStorageMessages))
-            }
-            else{
-                localStorageMessages.push(jsonData);
-            } */
+            localStorage.setItem("lastmessageinfo",JSON.stringify(data));
             document.getElementById('message').value=""
+            const newFileInput = document.createElement('input');
+            newFileInput.type = 'file';
+            newFileInput.id= 'fileInput';
+            
+            // Replace the old file input with the new one
+            fileInput.parentNode.replaceChild(newFileInput, fileInput);
+            sendDataToServer()
         }
         else{
             alert("semething went wrong. try again later");
         }
+    }catch(error){
+        console.log('something went wrong during upload:',error);
+    }
     }
     else{
         
@@ -96,84 +95,8 @@ async function fetchmessage(){
     }
 
     }
-/* 
-localStorageMessages=JSON.parse(localStorage.getItem("last10messages"));
-    //console.log('total localStorageMessages:',localStorageMessages.length,'  and type is :',typeof localStorageMessages);    
 
-    //load messages from local storage
-    if(localStorageMessages!=null && localStorageMessages.length>0){
-        console.log('loaded from local storage');
-    const length=localStorageMessages.length;
-
-    const table=document.getElementById("tabledata");
-    const tbody=document.createElement("tbody");
-    tbody.id="tbody";
-    table.appendChild(tbody)
-    const tr=document.createElement("tr");
-    const td=document.createElement("td");
-    td.class="text-center"
-    td.textContent="You Joined";
-    tr.appendChild(td);
-    tbody.appendChild(tr);
-   
-        for(let i=0;i<length;i++){
-                console.log('data:',localStorageMessages[i].message)
-            const tr=document.createElement("tr");
-            const td=document.createElement("td");
-            td.textContent=localStorageMessages[i].message;
-            tr.appendChild(td);
-            tbody.appendChild(tr);
-        }
-    
-    }
- 
-    const response=await axios.get('/fetchmessage',{headers:{'Authorization':localStorage.getItem("token")}});
-    console.log('resonse:',response);
-    const datalength=response.data.message.length;
-    const fixTenLength=datalength<6?datalength:6;
-    console.log('fix10:',fixTenLength);
-    const data=response.data.message;
-    console.log('data:',data)
-    const table=document.getElementById("tabledata");
-    const tbody=document.createElement("tbody");
-    tbody.id="tbody";
-    table.appendChild(tbody)
-    const tr=document.createElement("tr");
-    const td=document.createElement("td");
-    td.class="text-center"
-    td.textContent="You Joined";
-    tr.appendChild(td);
-    tbody.appendChild(tr);
-
-    const messages=[];
-    if(datalength>0){
-
-        for(let i=0;i<fixTenLength;i++){
-                console.log('data:',data[i].message)
-            const tr=document.createElement("tr");
-            const td=document.createElement("td");
-            td.textContent=data[i].message;
-            if(i<=9){
-            messages.push(data[i]);
-            console.log('messages arr length',messages.length);
-            }
-            tr.appendChild(td);
-            tbody.appendChild(tr);
-        }
-
-        localStorage.setItem('last10messages',JSON.stringify(messages));
-    }
-    else{
-        const li=document.createElement("p");
-            li.textContent='no message';
-            ul.appendChild(li);
-    }
-}   
-*/
 }
-
-//setInterval(refreshMessages, 1000);
-
 
 async function refreshMessages(){
     
@@ -305,12 +228,13 @@ function loadChatContent(response,groupid,groupname){
     table.innerHTML="";
     table.name=groupid;//for specific chat group
     const tbody=document.createElement("tbody");
-    tbody.id="tbody";
+   tbody.id="tbody";
+    console.log('groupid:',groupid);
+    tbody.setAttribute('data-groupid', groupid);
+   // console.log('tbody first:',tbody);
     table.appendChild(tbody)
    
-    const messages=[];
     if(datalength>0){
-        console.log('hello from line 301');
         const tr=document.createElement("tr");
         const td=document.createElement("td");
         td.textContent="You Joined";
@@ -320,10 +244,10 @@ function loadChatContent(response,groupid,groupname){
         tbody.appendChild(tr);
 
         for(let i=datalength-1;i>=start;i--){
-                console.log('data:',data[i].message)
+                console.log('data:',data[i])
             const tr=document.createElement("tr");
             const td=document.createElement("td");
-            //td.id="hello";
+
             const dbTimeString = data[i].createdAt;
     const dbTime = new Date(dbTimeString);
     const options = { 
@@ -342,12 +266,60 @@ const options2 = {
 const formattedTime =dbTime.toLocaleString('en-US', options)+' '+dbTime.toLocaleString('en-US', options2);
     if(data[i].memberid==cid){
         td.classList='text-right'
+      
+
+
+    if(data[i].MessageType=="text"){
         td.textContent = 'You: ' + data[i].message;
+        td.innerHTML += "<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
+    }
+
+    else if(data[i].MessageType.includes('image') || data[i].MessageType.includes('png') || data[i].MessageType.includes('jpg')){
+        
+    td.innerHTML='You'+'<br>'+'<img src="' + data[i].ContentURL + '" alt="Image" height="200" width="200">';
+    }
+
+    else if(data[i].MessageType.includes('video') || data[i].MessageType.includes('mp4') || data[i].MessageType.includes('webm') || data[i].MessageType.includes('mov')){
+        
+        td.innerHTML='You'+'<br>'+'<video width="200" controls>'+'<source src="' + data[i].ContentURL + '" type="video/mp4"> Your browser does not support HTML video.</video>';
+        }
+
+    if(data[i].message!="null"){
+        console.log('not null');
+    td.innerHTML += "<br>"+data[i].message+"<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
     }
     else{
-        td.textContent = `${data[i].name}: ` + data[i].message;
-    }
+        console.log('null');
         td.innerHTML += "<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
+    }
+ }
+    else{
+
+        if(data[i].MessageType=="text"){
+            td.textContent = `${data[i].name}: ` + data[i].message;
+            td.innerHTML += "<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
+        }
+
+        else if(data[i].MessageType.includes('image') || data[i].MessageType.includes('png') || data[i].MessageType.includes('jpg')){
+        
+            td.innerHTML=`${data[i].name}: `+'<br>'+'<img src="' + data[i].ContentURL + '" alt="Image" height="200" width="200">';
+        }
+
+        else if(data[i].MessageType.includes('video') || data[i].MessageType.includes('mp4') || data[i].MessageType.includes('webm') || data[i].MessageType.includes('mov')){
+        
+            td.innerHTML=`${data[i].name}: `+'<br>'+'<video width="200" controls>'+'<source src="' + data[i].ContentURL + '" type="video/mp4"> Your browser does not support HTML video.</video>';
+        }
+            if(data[i].message!=="null"){
+                console.log('not null');
+            td.innerHTML += "<br>"+data[i].message+"<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
+            }
+            else{
+                console.log('null');
+                td.innerHTML += "<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
+            }
+    }
+
+
             tr.appendChild(td);
             tbody.appendChild(tr);
         }
@@ -507,7 +479,7 @@ catch(error){
 
 
 async function loadContactsfiltered(chatgroupid){
-    console.log('hello world');
+    //console.log('hello world');
 
     const response=await axios.get(`/loadcontactsexcluded?groupid=${chatgroupid}`,{headers:{'Authorization':localStorage.getItem("token")}});
 
@@ -591,3 +563,143 @@ console.log('info:',info);
     }
 }
 
+
+    var input = document.getElementById('message').value;
+    console.log('input value:',input);
+  
+function sendDataToServer(){
+      const storedDataString =localStorage.getItem("lastmessageinfo");
+      const storedData=JSON.parse(storedDataString);
+      //console.log('message1233:',storedData.ContentURL);
+        const data={
+            messengersendortoken:localStorage.getItem("token"),
+            messengersendorname:localStorage.getItem("name"),
+            message:storedData.message,
+            ContentURL:storedData.ContentURL,
+            MessageType:storedData.MessageType,
+            chatgroupid:storedData.chatgroupid,
+        }
+      console.log('sending to server:',data);
+        socket.emit('chat message', data);
+      
+    };
+  
+
+socket.on('chat message', async function(msg) {
+    console.log('message from server:',msg);
+    const messageType=msg.MessageType;
+    
+const tbody=document.querySelector(`tbody[data-groupid="${msg.chatgroupid}"]`);
+console.log('tbody111:',tbody);
+  const tr=document.createElement("tr");
+  const td=document.createElement("td");
+  
+  try{
+  const response=await axios.get('/getstatus',{
+    headers: {
+    'messengersendortoken': msg.messengersendortoken,
+    'currentusertoken': localStorage.getItem("token")
+  }
+  })
+console.log('response data:',response);
+// Get the current date
+
+const currentDate = new Date();
+
+const nextDate = new Date(currentDate);
+nextDate.setDate(currentDate.getDate());
+
+// Format the next date as a string (YYYY-MM-DD)
+  const today = nextDate.toISOString().slice(0, 10);
+ 
+  function addLeadingZero(number) {
+  return number < 10 ? "0" + number : number;
+}
+// Get the current time in "HH:mm:ss" format
+const timeNow = addLeadingZero(new Date().getHours()) + ":" +
+                addLeadingZero(new Date().getMinutes()) + ":" +
+                addLeadingZero(new Date().getSeconds());
+
+// Concatenate the date and time
+const dbTimeString = today + " " + timeNow;
+
+    const dbTime = new Date(dbTimeString);
+   // console.log('dbTime:',dbTime);
+    const options = { 
+        hour: '2-digit', 
+        minute: '2-digit'
+        
+};
+
+const options2 = { 
+    day: '2-digit', 
+    month: 'short',
+    year:'2-digit',
+    
+};
+
+const formattedTime =dbTime.toLocaleString('en-US', options)+' '+dbTime.toLocaleString('en-US', options2);
+
+if(response.data.STATUS===1){
+    td.classList='text-right'
+    
+    if(msg.MessageType.includes('text')){
+        td.textContent = 'You: ' + msg.message;
+        td.innerHTML +="<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
+    }
+    else if(msg.MessageType.includes('image') || msg.MessageType.includes('png') || msg.MessageType.includes('jpg')){
+    td.innerHTML='You'+'<br>'+'<img src="' + msg.ContentURL + '" alt="Image" height="200" width="200">';
+    }
+
+    else if(msg.MessageType.includes('video') || msg.MessageType.includes('mp4') || msg.MessageType.includes('webm') || data[i].MessageType.includes('mov')){
+        
+        td.innerHTML=`${msg.messengersendorname}: `+'<br>'+'<video width="200" controls>'+'<source src="' + msg.ContentURL + '" type="video/mp4"> Your browser does not support HTML video.</video>';
+        }
+
+    if(msg.message!=="null"){
+        console.log('not null');
+    td.innerHTML += "<br>"+msg.message+"<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
+    }
+    else{
+        console.log('null');
+        td.innerHTML += "<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
+    }
+    
+} 
+ 
+if(response.data.STATUS==0){
+    td.classList='text-left'
+console.log('msg.messengersendorname0:',msg.messengersendorname);
+    if(messageType.includes('text')){
+        td.textContent = `${msg.messengersendorname}: ` + msg.message;
+        td.innerHTML +="<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
+    }
+
+    else if(msg.MessageType.includes('image') || msg.MessageType.includes('png') || msg.MessageType.includes('jpg')){
+        td.innerHTML=`${msg.messengersendorname}: `+'<br>'+'<img src="' + msg.ContentURL + '" alt="Image" height="200" width="200">';
+    }    
+    else if(msg.MessageType.includes('video') || msg.MessageType.includes('mp4') || msg.MessageType.includes('webm') || messageType.includes('mov')){
+        
+            td.innerHTML=`${msg.messengersendorname}: `+'<br>'+'<video width="200" controls>'+'<source src="' + msg.ContentURL + '" type="video/mp4"> Your browser does not support HTML video.</video>';
+            }
+    
+        if(msg.message!=="null"){
+            console.log('not null');
+        td.innerHTML += "<br>"+msg.message+"<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
+        }
+        else{
+            console.log('null');
+            td.innerHTML += "<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
+        }
+    }
+        
+  }
+  catch(error){
+    console.log('error during getting status:',error);
+  }
+
+            tr.appendChild(td);
+            tbody.appendChild(tr);
+console.log('tr:',tr);
+console.log('td:',td);
+  });
