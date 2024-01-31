@@ -4,6 +4,7 @@ const mime=require('mime-types')
 const path = require('path');
 const app = express();
 const http = require('http');
+const {CronJob}=require("cron")
 const server = http.createServer(app);
 const { Server: SocketIOServer } = require("socket.io");
 const io = new SocketIOServer(server);
@@ -11,6 +12,8 @@ const homeRoute = require('./route/home');
 const jwt=require("jsonwebtoken");
 const secretKey="7539753909887979qggjgjjjjhh"
 const sequelize=require('./util/database');
+const { Op }=require("sequelize");
+const { Sequelize }=require("sequelize");
 const groupcreators=require('./model/groupcreators');
 const groupinfo=require("./model/groupinfo");
 const User=require("./model/signup");
@@ -19,6 +22,7 @@ const multer = require('multer');
 const PORT = process.env.PORT || 8080;
 var cors=require("cors");
 const conversation = require('./model/conversation');
+const AC= require('./model/ArchivedChat');
 app.set('views', 'views');//// Set the 'views' directory for the application
 app.use(bodyParser.json());
 
@@ -162,6 +166,51 @@ io.on('connection', (socket) => {
     console.log('user disconnected');
   });
 });
+
+console.log('Before job instantiation');
+
+// Schedule the job to run every minute
+const job = new CronJob('1 0 * * *',async function () {
+    const d = new Date();
+    console.log('Running on:', d);
+    const yesterday = new Date();
+yesterday.setDate(yesterday.getDate() - 1);
+
+AC.bulkCreate(
+  await conversation.findAll({
+    attributes: [
+      'memberid', 'groupid', 'message', 'createdAt', 'updatedAt', 'isactive', 'MessageType', 'ContentURL'
+    ],
+    where: {
+      createdAt: {
+        [Op.lt]: Sequelize.literal('CURDATE() - INTERVAL 1 DAY')
+      }
+    },
+    raw: true // To get plain JSON objects instead of Sequelize instances
+  })
+).then(results=>{  
+  //console.log('result:',JSON.stringify(results));
+console.log('data moved successfully to the archived table');
+
+  conversation.destroy({
+    where: {
+      createdAt: {
+        [Op.lt]: Sequelize.literal('CURDATE() - INTERVAL 1 DAY')
+      }
+    }
+  }).then(rowsDeleted => {
+    console.log(`Deleted ${rowsDeleted} rows`);
+  }).catch(error => {
+    console.error('Error deleting rows:', error);
+  });
+}).catch(error=>{
+  console.error('Error inserting rows in archivedchat:', error);
+})
+console.log('After job instantiation');   
+})
+
+// Start the cron job
+job.start();
 
 // Start the server
 sequelize.sync() // Sync the database models with the actual database

@@ -104,7 +104,7 @@ exports.getSignIn=(req, res) => {
 
 
 
-  exports.saveMessage=(req, res) => {
+  exports.Message=(req, res) => {
     const { token, message,chatgroupid } = req.body;
     console.log('token:',token);
     const id=jwt.verify(token,secretKey);

@@ -277,12 +277,6 @@ const formattedTime =dbTime.toLocaleString('en-US', options)+' '+dbTime.toLocale
     else if(data[i].MessageType.includes('image') || data[i].MessageType.includes('png') || data[i].MessageType.includes('jpg')){
         
     td.innerHTML='You'+'<br>'+'<img src="' + data[i].ContentURL + '" alt="Image" height="200" width="200">';
-    }
-
-    else if(data[i].MessageType.includes('video') || data[i].MessageType.includes('mp4') || data[i].MessageType.includes('webm') || data[i].MessageType.includes('mov')){
-        
-        td.innerHTML='You'+'<br>'+'<video width="200" controls>'+'<source src="' + data[i].ContentURL + '" type="video/mp4"> Your browser does not support HTML video.</video>';
-        }
 
     if(data[i].message!="null"){
         console.log('not null');
@@ -292,6 +286,24 @@ const formattedTime =dbTime.toLocaleString('en-US', options)+' '+dbTime.toLocale
         console.log('null');
         td.innerHTML += "<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
     }
+
+    }
+
+    else if(data[i].MessageType.includes('video') || data[i].MessageType.includes('mp4') || data[i].MessageType.includes('webm') || data[i].MessageType.includes('mov')){
+        
+        td.innerHTML='You'+'<br>'+'<video width="200" controls>'+'<source src="' + data[i].ContentURL + '" type="video/mp4"> Your browser does not support HTML video.</video>';
+
+        if(data[i].message!="null"){
+            console.log('not null');
+        td.innerHTML += "<br>"+data[i].message+"<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
+        }
+        else{
+            console.log('null');
+            td.innerHTML += "<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
+        }
+
+        }
+
  }
     else{
 
@@ -303,12 +315,7 @@ const formattedTime =dbTime.toLocaleString('en-US', options)+' '+dbTime.toLocale
         else if(data[i].MessageType.includes('image') || data[i].MessageType.includes('png') || data[i].MessageType.includes('jpg')){
         
             td.innerHTML=`${data[i].name}: `+'<br>'+'<img src="' + data[i].ContentURL + '" alt="Image" height="200" width="200">';
-        }
 
-        else if(data[i].MessageType.includes('video') || data[i].MessageType.includes('mp4') || data[i].MessageType.includes('webm') || data[i].MessageType.includes('mov')){
-        
-            td.innerHTML=`${data[i].name}: `+'<br>'+'<video width="200" controls>'+'<source src="' + data[i].ContentURL + '" type="video/mp4"> Your browser does not support HTML video.</video>';
-        }
             if(data[i].message!=="null"){
                 console.log('not null');
             td.innerHTML += "<br>"+data[i].message+"<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
@@ -317,6 +324,21 @@ const formattedTime =dbTime.toLocaleString('en-US', options)+' '+dbTime.toLocale
                 console.log('null');
                 td.innerHTML += "<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
             }
+        }
+
+        else if(data[i].MessageType.includes('video') || data[i].MessageType.includes('mp4') || data[i].MessageType.includes('webm') || data[i].MessageType.includes('mov')){
+        
+            td.innerHTML=`${data[i].name}: `+'<br>'+'<video width="200" controls>'+'<source src="' + data[i].ContentURL + '" type="video/mp4"> Your browser does not support HTML video.</video>';
+            if(data[i].message!=="null"){
+                console.log('not null');
+            td.innerHTML += "<br>"+data[i].message+"<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
+            }
+            else{
+                console.log('null');
+                td.innerHTML += "<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
+            }
+        }
+            
     }
 
 
@@ -602,6 +624,7 @@ console.log('tbody111:',tbody);
   }
   })
 console.log('response data:',response);
+console.log('response.data.STATUS===1:',response.data.STATUS,' result:',response.data.STATUS===1)
 // Get the current date
 
 const currentDate = new Date();
@@ -642,19 +665,13 @@ const formattedTime =dbTime.toLocaleString('en-US', options)+' '+dbTime.toLocale
 
 if(response.data.STATUS===1){
     td.classList='text-right'
-    
+    console.log('one');
     if(msg.MessageType.includes('text')){
         td.textContent = 'You: ' + msg.message;
         td.innerHTML +="<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
     }
     else if(msg.MessageType.includes('image') || msg.MessageType.includes('png') || msg.MessageType.includes('jpg')){
-    td.innerHTML='You'+'<br>'+'<img src="' + msg.ContentURL + '" alt="Image" height="200" width="200">';
-    }
-
-    else if(msg.MessageType.includes('video') || msg.MessageType.includes('mp4') || msg.MessageType.includes('webm') || data[i].MessageType.includes('mov')){
-        
-        td.innerHTML=`${msg.messengersendorname}: `+'<br>'+'<video width="200" controls>'+'<source src="' + msg.ContentURL + '" type="video/mp4"> Your browser does not support HTML video.</video>';
-        }
+    td.innerHTML='You '+'<br>'+'<img src="' + msg.ContentURL + '" alt="Image" height="200" width="200">';
 
     if(msg.message!=="null"){
         console.log('not null');
@@ -664,10 +681,29 @@ if(response.data.STATUS===1){
         console.log('null');
         td.innerHTML += "<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
     }
+
+    }
+
+    else if(msg.MessageType.includes('video') || msg.MessageType.includes('mp4') || msg.MessageType.includes('webm') || data[i].MessageType.includes('mov')){
+        
+        td.innerHTML=`You `+'<br>'+'<video width="200" controls>'+'<source src="' + msg.ContentURL + '" type="video/mp4"> Your browser does not support HTML video.</video>';
+
+        if(msg.message!=="null"){
+            console.log('not null');
+        td.innerHTML += "<br>"+msg.message+"<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
+        }
+        else{
+            console.log('null');
+            td.innerHTML += "<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
+        }
+
+        }
+
     
 } 
  
-if(response.data.STATUS==0){
+if(response.data.STATUS===0){
+    console.log('zero');
     td.classList='text-left'
 console.log('msg.messengersendorname0:',msg.messengersendorname);
     if(messageType.includes('text')){
@@ -677,12 +713,7 @@ console.log('msg.messengersendorname0:',msg.messengersendorname);
 
     else if(msg.MessageType.includes('image') || msg.MessageType.includes('png') || msg.MessageType.includes('jpg')){
         td.innerHTML=`${msg.messengersendorname}: `+'<br>'+'<img src="' + msg.ContentURL + '" alt="Image" height="200" width="200">';
-    }    
-    else if(msg.MessageType.includes('video') || msg.MessageType.includes('mp4') || msg.MessageType.includes('webm') || messageType.includes('mov')){
-        
-            td.innerHTML=`${msg.messengersendorname}: `+'<br>'+'<video width="200" controls>'+'<source src="' + msg.ContentURL + '" type="video/mp4"> Your browser does not support HTML video.</video>';
-            }
-    
+
         if(msg.message!=="null"){
             console.log('not null');
         td.innerHTML += "<br>"+msg.message+"<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
@@ -691,6 +722,23 @@ console.log('msg.messengersendorname0:',msg.messengersendorname);
             console.log('null');
             td.innerHTML += "<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
         }
+    }    
+    else if(msg.MessageType.includes('video') || msg.MessageType.includes('mp4') || msg.MessageType.includes('webm') || messageType.includes('mov')){
+        
+            td.innerHTML=`${msg.messengersendorname}: `+'<br>'+'<video width="200" controls>'+'<source src="' + msg.ContentURL + '" type="video/mp4"> Your browser does not support HTML video.</video>';
+
+            if(msg.message!=="null"){
+                console.log('not null');
+            td.innerHTML += "<br>"+msg.message+"<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
+            }
+            else{
+                console.log('null');
+                td.innerHTML += "<br><span style='font-size: 0.6em;'>" + formattedTime + "</span>";
+            }
+
+        }
+    
+
     }
         
   }
